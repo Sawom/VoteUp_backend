@@ -1,8 +1,82 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+  votes Vote[]
+
+  @@map("users")
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  title     String
+  body      String?
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  questions PollQuestion[]
+
+  @@index([authorId])
+  @@map("posts")
+}
+
+model PollQuestion {
+  id        String   @id @default(uuid())
+  postId    String
+  question  String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post    Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  options PollOption[]
+
+  @@index([postId])
+  @@unique([postId, order])
+  @@map("poll_questions")
+}
+
+model PollOption {
+  id         String   @id @default(uuid())
+  questionId String
+  label      String
+  imageUrl   String?
+  order      Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  question PollQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  votes    Vote[]
+
+  @@index([questionId])
+  @@unique([questionId, order])
+  @@map("poll_options")
+}
+
+model Vote {
+  id        String   @id @default(uuid())
+  userId    String
+  optionId  String
+  createdAt DateTime @default(now())
+
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, optionId])
+  @@index([optionId])
+  @@map("votes")
 }
