@@ -1,36 +1,34 @@
-import cors from "cors";
-import express, { Application, Request, Response } from "express";
+import express, { Application, NextFunction, Request, Response } from 'express';
+import cors from 'cors';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
 
-/**
- * Express application instance for the VoteUp backend.
- *
- * How requests flow through this file:
- * - `express()` creates the app container.
- * - `app.use(...)` registers global middleware that runs before route handlers.
- * - `app.get(...)` registers a route handler for a specific HTTP method + path.
- *
- * In larger apps, this module typically only wires middleware + mounts router
- * modules (e.g. `app.use('/api', apiRouter)`), while controllers/services live
- * elsewhere. Right now the project contains a single health/root endpoint.
- */
+import config from './config';
+import { uptime } from 'process';
+import { timeStamp } from 'console';
+import notFound from './app/middlewares/notfound';
+
 const app: Application = express();
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true
+}));
 
-// Enable CORS so browsers can call this API from other origins (frontend apps, local dev, etc.).
-app.use(cors());
+//parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-/**
- * Root endpoint (simple sanity/health response).
- *
- * This is often used by:
- * - load balancers / uptime checks
- * - humans verifying the server is reachable
- * - local dev "is it running?" checks
- */
-app.get("/", (req: Request, res: Response) => {
-  // Respond with JSON; Express detects the object and sets the content-type.
-  res.send({
-    Message: "voteUp server",
-  });
+
+app.get('/', (req: Request, res: Response) => {
+    res.send({
+        message: "Server is running..",
+        environment: config.node_env,
+        uptime: process.uptime().toFixed(2) + " sec",
+        timeStamp: new Date().toISOString()
+    })
 });
+
+
+app.use(globalErrorHandler);
+app.use(notFound);
 
 export default app;

@@ -1,30 +1,45 @@
 import { Server } from "http";
 import app from "./app";
+import config from "./config";
 
-/**
- * Port the HTTP server listens on.
- *
- * In production, this is commonly driven by `process.env.PORT`, but this
- * project currently uses a fixed value for simplicity.
- */
-const port = 3000;
+async function bootstrap() {
+    // This variable will hold our server instance
+    let server: Server;
 
-/**
- * Bootstraps the HTTP server.
- *
- * Request lifecycle at runtime:
- * - Node creates an HTTP server via `app.listen(...)`
- * - Incoming requests are handed to Express (`app`)
- * - Express runs middleware in the order registered (e.g. `cors()`)
- * - Express matches the request to a route handler (e.g. GET `/`)
- * - The handler writes the response and ends the request
- */
-async function main() {
-  // Start listening. The callback fires once the port is successfully bound.
-  const Server: Server = app.listen(port, () => {
-    console.log("voteUp app is listening on port", port);
-  });
+    try {
+        // Start the server
+        server = app.listen(config.port, () => {
+            console.log(`🚀 vote-up Server is running on http://localhost:${config.port}`);
+        });
+
+        // Function to gracefully shut down the server
+        const exitHandler = () => {
+            if (server) {
+                server.close(() => {
+                    console.log('Server closed gracefully.');
+                    process.exit(1); // Exit with a failure code
+                });
+            } else {
+                process.exit(1);
+            }
+        };
+
+        // Handle unhandled promise rejections
+        process.on('unhandledRejection', (error) => {
+            console.log('Unhandled Rejection is detected, we are closing our server...');
+            if (server) {
+                server.close(() => {
+                    console.log(error);
+                    process.exit(1);
+                });
+            } else {
+                process.exit(1);
+            }
+        });
+    } catch (error) {
+        console.error('Error during server startup:', error);
+        process.exit(1);
+    }
 }
 
-// Invoke the bootstrap function.
-main();
+bootstrap();
