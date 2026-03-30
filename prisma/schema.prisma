@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -12,7 +12,9 @@ model User {
   role  Role   @default(USER)
   name      String?
   email     String    @unique
+  profilePhoto  String?
   password  String
+  isVerified    Boolean   @default(false)
   polls     Poll[]
   votes     Vote[]
   likes     Like[]
@@ -23,8 +25,6 @@ model User {
 
   @@map("users")
 }
-
-
 
 model Poll {
   id          String    @id @default(cuid())
@@ -53,13 +53,9 @@ model Poll {
 
   @@index([creatorId])
   @@index([isDeleted]) // indexing for soft delete filtering
+  @@index([endTime]) // Added: To quickly query active/expired polls
 
   @@map("polls")
-}
-
-enum PollType {
-  YES_NO
-  CUSTOM
 }
 
 model Option {
@@ -67,7 +63,7 @@ model Option {
   text      String?
   imageUrl  String?
   pollId    String
-  poll      Poll     @relation(fields: [pollId], references: [id])
+  poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
   votes     Vote[]
 
   @@index([pollId])
@@ -108,7 +104,7 @@ model Comment {
   userId    String
   pollId    String
   user      User     @relation(fields: [userId], references: [id])
-  poll      Poll     @relation(fields: [pollId], references: [id])
+  poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
   isDeleted   Boolean   @default(false)
   deletedAt   DateTime?
   createdAt DateTime @default(now())
@@ -130,7 +126,6 @@ model Share {
   @@map("shares")
 }
 
-
 model Report {
   id          String   @id @default(cuid())
   reason      String   // ( Harassment, Spam, Hate Speech)
@@ -144,6 +139,7 @@ model Report {
 
   status      ReportStatus @default(PENDING) // PENDING, REVIEWED, ACTION_TAKEN
   createdAt   DateTime @default(now())
+  @@unique([reporterId, pollId]) // Added: Prevents duplicate reports from same user
 
   @@index([pollId])
   @@index([status])
@@ -160,4 +156,9 @@ enum Role {
   USER
   ADMIN
   SUPER_ADMIN
+}
+
+enum PollType {
+  YES_NO
+  CUSTOM
 }
