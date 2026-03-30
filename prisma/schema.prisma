@@ -6,3 +6,158 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id        String    @id @default(cuid())
+  role  Role   @default(USER)
+  name      String?
+  email     String    @unique
+  password  String
+  polls     Poll[]
+  votes     Vote[]
+  likes     Like[]
+  comments  Comment[]
+  shares    Share[]
+  reportsSent     Report[] @relation("Reporter")
+  createdAt DateTime  @default(now())
+
+  @@map("users")
+}
+
+
+
+model Poll {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  type        PollType  @default(YES_NO)
+  creatorId   String
+  creator     User      @relation(fields: [creatorId], references: [id])
+  
+  options     Option[]
+  votes       Vote[]
+  likes       Like[]
+  comments    Comment[]
+  shares      Share[]
+  reports     Report[]
+
+  startTime   DateTime  @default(now())
+  endTime     DateTime
+  
+  // Soft Delete 
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime? 
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([creatorId])
+  @@index([isDeleted]) // indexing for soft delete filtering
+
+  @@map("polls")
+}
+
+enum PollType {
+  YES_NO
+  CUSTOM
+}
+
+model Option {
+  id        String   @id @default(cuid())
+  text      String?
+  imageUrl  String?
+  pollId    String
+  poll      Poll     @relation(fields: [pollId], references: [id])
+  votes     Vote[]
+
+  @@index([pollId])
+  @@map("options")
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  pollId    String
+  optionId  String
+  user      User     @relation(fields: [userId], references: [id])
+  poll      Poll     @relation(fields: [pollId], references: [id])
+  option    Option   @relation(fields: [optionId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, pollId]) 
+
+  @@map("votes")
+}
+
+model Like {
+  id     String @id @default(cuid())
+  userId String
+  pollId String
+  user   User   @relation(fields: [userId], references: [id])
+  poll   Poll   @relation(fields: [pollId], references: [id])
+
+  // like to unlike system
+  @@unique([userId, pollId])
+
+  @@map("likes")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  pollId    String
+  user      User     @relation(fields: [userId], references: [id])
+  poll      Poll     @relation(fields: [pollId], references: [id])
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pollId, isDeleted])
+
+  @@map("comments")
+}
+
+model Share {
+  id     String @id @default(cuid())
+  userId String
+  pollId String
+  user   User   @relation(fields: [userId], references: [id])
+  poll   Poll   @relation(fields: [pollId], references: [id])
+
+  createdAt DateTime @default(now())
+  @@map("shares")
+}
+
+
+model Report {
+  id          String   @id @default(cuid())
+  reason      String   // ( Harassment, Spam, Hate Speech)
+  details     String?  
+  
+  reporterId  String   // who is reported
+  reporter    User     @relation("Reporter", fields: [reporterId], references: [id])
+  
+  pollId      String   // against post
+  poll        Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  status      ReportStatus @default(PENDING) // PENDING, REVIEWED, ACTION_TAKEN
+  createdAt   DateTime @default(now())
+
+  @@index([pollId])
+  @@index([status])
+  @@map("reports")
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  ACTION_TAKEN
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
