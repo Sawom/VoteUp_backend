@@ -10,7 +10,7 @@ const createUser = async (req: Request): Promise<User> => {
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
 
   const userData = {
-    email: req.body.admin.email,
+    email: req.body.email,
     name: req.body.name,
     password: hashedPassword,
     role: Role.USER,

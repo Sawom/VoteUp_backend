@@ -1,33 +1,35 @@
-import express, { Application, NextFunction, Request, Response } from 'express';
-import cors from 'cors';
-import globalErrorHandler from './app/middlewares/globalErrorHandler';
+import express, { Application, NextFunction, Request, Response } from "express";
+import cors from "cors";
+import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 
-import config from './config';
-import { uptime } from 'process';
-import { timeStamp } from 'console';
-import notFound from './app/middlewares/notfound';
+import config from "./config";
+import { uptime } from "process";
+import { timeStamp } from "console";
+import notFound from "./app/middlewares/notfound";
+import router from "./app/routes";
 
 const app: Application = express();
-app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
-    credentials: true
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    credentials: true,
+  }),
+);
 
 //parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-app.get('/', (req: Request, res: Response) => {
-    res.send({
-        message: "Server is running..",
-        environment: config.node_env,
-        uptime: process.uptime().toFixed(2) + " sec",
-        timeStamp: new Date().toISOString()
-    })
+app.get("/", (req: Request, res: Response) => {
+  res.send({
+    message: "Server is running..",
+    environment: config.node_env,
+    uptime: process.uptime().toFixed(2) + " sec",
+    timeStamp: new Date().toISOString(),
+  });
 });
 
-
+app.use("/api/v1", router);
 app.use(globalErrorHandler);
 app.use(notFound);
 
