@@ -21,6 +21,7 @@ model User {
   shares    Share[]
   reportsSent     Report[] @relation("Reporter")
   createdAt DateTime  @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("users")
 }
@@ -78,6 +79,7 @@ model Vote {
   poll      Poll     @relation(fields: [pollId], references: [id])
   option    Option   @relation(fields: [optionId], references: [id])
   createdAt DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@unique([userId, pollId]) 
 
@@ -120,8 +122,9 @@ model Share {
   pollId String
   user   User   @relation(fields: [userId], references: [id])
   poll   Poll   @relation(fields: [pollId], references: [id])
-
   createdAt DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
   @@map("shares")
 }
 
@@ -138,6 +141,7 @@ model Report {
 
   status      ReportStatus @default(PENDING) // PENDING, REVIEWED, ACTION_TAKEN
   createdAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   @@unique([reporterId, pollId]) // Added: Prevents duplicate reports from same user
 
   @@index([pollId])

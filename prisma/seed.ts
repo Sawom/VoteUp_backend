@@ -1,6 +1,15 @@
-import { Role } from "@prisma/client";
-import prisma from "../src/shared/prisma";
+import { PrismaClient, Role } from "@prisma/client";
 import * as bcrypt from "bcrypt";
+
+import { PrismaPg } from "@prisma/adapter-pg";
+
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+});
+
+const prisma = new PrismaClient({
+  adapter,
+});
 
 const seedSuperAdmin = async () => {
   try {
@@ -22,13 +31,7 @@ const seedSuperAdmin = async () => {
         email: "super@admin.com",
         password: hashedPassword,
         role: Role.SUPER_ADMIN,
-        admin: {
-          create: {
-            name: "Super Admin",
-            email: "super@admin.com",
-            contactNumber: "01234567890",
-          },
-        },
+        name: "Super Admin",
       },
     });
     console.log("Super Admin Created Successfully!", superAdminData);
@@ -38,3 +41,10 @@ const seedSuperAdmin = async () => {
     await prisma.$disconnect();
   }
 };
+
+seedSuperAdmin();
+
+// superAdmin is only one in a project. here I seed super admin because in future when I add new feature to my project,
+//  I need to clone this repository from github. then I command to create and active a super admin and use super admin's
+//  features and its dependencies
+//after create seed.ts run: npx prisma db seed
