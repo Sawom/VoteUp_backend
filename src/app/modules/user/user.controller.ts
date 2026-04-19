@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import sendResponse from "../../../shared/sendResponse";
 import { userService } from "./user.service";
 import httpStatus from "http-status";
+import catchAsync from "../../../shared/catchAsync";
 
 const createUser = async (req: Request, res: Response) => {
   const result = await userService.createUser(req);
@@ -13,6 +14,18 @@ const createUser = async (req: Request, res: Response) => {
   });
 };
 
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await userService.getAllUsers(req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Users fetched successfully!",
+    data: result,
+  });
+});
+
 export const userController = {
   createUser,
+  getAllUsers,
 };

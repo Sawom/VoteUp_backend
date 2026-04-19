@@ -23,6 +23,22 @@ const createUser = async (req: Request): Promise<User> => {
   return createUser;
 };
 
+const getAllUsers = async (params: any) => {
+  const getUser = await prisma.user.findMany({
+    where: params,
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  return getUser;
+};
+
 export const userService = {
   createUser,
+  getAllUsers,
 };
