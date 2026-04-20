@@ -3,9 +3,16 @@ import { IFile } from "../../interfaces/file";
 import * as bcrypt from "bcrypt";
 import { Request } from "express";
 import prisma from "../../../shared/prisma";
+import { fileUploader } from "../../../helpars/fileUploader";
 
 const createUser = async (req: Request): Promise<User> => {
-  // const file = req.file as IFile;
+  const file = req.file as IFile;
+
+  if (file) {
+    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+    // console.log(uploadToCloudinary); here we console to get CloudinaryResponse type
+    req.body.admin.profilePhoto = uploadToCloudinary?.secure_url; //secure_url provides img link and it is Cloudinary's property
+  }
 
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
 
