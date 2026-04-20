@@ -3,6 +3,8 @@ import sendResponse from "../../../shared/sendResponse";
 import { userService } from "./user.service";
 import httpStatus from "http-status";
 import catchAsync from "../../../shared/catchAsync";
+import { userFilterableFields } from "./user.constant";
+import pick from "../../../shared/pick";
 
 const createUser = async (req: Request, res: Response) => {
   const result = await userService.createUser(req);
@@ -15,9 +17,11 @@ const createUser = async (req: Request, res: Response) => {
 };
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+ const filters = pick(req.query, userFilterableFields);
+ const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
 
-  
-  const result = await userService.getAllUsers(req.query);
+
+  const result = await userService.getAllUsers(filters, options);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

@@ -20,10 +20,11 @@ const createUser = async (req: Request): Promise<User> => {
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
 
   const userData = {
-    email: req.body.email,
-    name: req.body.name,
+    email: req.body.user.email,
+    name: req.body.user.name,
     password: hashedPassword,
     role: Role.USER,
+    profilePhoto: req.body.user.profilePhoto || null,
   };
 
   const createUser = await prisma.user.create({
