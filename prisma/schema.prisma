@@ -11,6 +11,7 @@ datasource db {
 model User {
   id        String    @id @default(cuid())
   role  Role   @default(USER)
+  gender Gender
   name      String?
   email     String    @unique
   profilePhoto  String?
@@ -149,6 +150,12 @@ model Report {
   @@index([pollId])
   @@index([status])
   @@map("reports")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
 }
 
 enum ReportStatus {

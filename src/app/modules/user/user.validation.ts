@@ -1,5 +1,4 @@
 import { z } from "zod";
-
 // before createUser operation we need to validate it to create validation we need to console req.body.data
 // and see which response will come. then that way we need to write validation
 
@@ -13,6 +12,9 @@ const createUser = z.object({
     }),
     email: z.string({
       message: "Email is required!",
+    }),
+    gender: z.enum(["MALE", "FEMALE", "NON_BINARY"], {
+      message: "Gender is required!",
     }),
   }),
 });

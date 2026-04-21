@@ -17,9 +17,8 @@ const createUser = async (req: Request, res: Response) => {
 };
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
- const filters = pick(req.query, userFilterableFields);
- const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-
+  const filters = pick(req.query, userFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
 
   const result = await userService.getAllUsers(filters, options);
 
@@ -27,7 +26,8 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "Users fetched successfully!",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 

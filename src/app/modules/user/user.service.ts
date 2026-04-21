@@ -1,4 +1,4 @@
-import { Prisma, Role, User } from "@prisma/client";
+import { Prisma, Role, User, Gender } from "@prisma/client";
 import { IFile } from "../../interfaces/file";
 import * as bcrypt from "bcrypt";
 import { Request } from "express";
@@ -8,6 +8,7 @@ import { paginationHelper } from "../../../helpars/paginationHelper";
 import { userSearchAbleFields } from "./user.constant";
 import { IPaginationOptions } from "../../interfaces/pagination";
 
+// create user
 const createUser = async (req: Request): Promise<User> => {
   const file = req.file as IFile;
 
@@ -24,6 +25,7 @@ const createUser = async (req: Request): Promise<User> => {
     name: req.body.user.name,
     password: hashedPassword,
     role: Role.USER,
+    gender: req.body.user.gender as Gender,
     profilePhoto: req.body.user.profilePhoto || null,
   };
 
@@ -34,6 +36,7 @@ const createUser = async (req: Request): Promise<User> => {
   return createUser;
 };
 
+// get all users
 const getAllUsers = async (params: any, options: IPaginationOptions) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
@@ -81,6 +84,7 @@ const getAllUsers = async (params: any, options: IPaginationOptions) => {
       email: true,
       name: true,
       role: true,
+      gender: true,
       createdAt: true,
       updatedAt: true,
     },
