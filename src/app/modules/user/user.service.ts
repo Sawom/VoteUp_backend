@@ -7,6 +7,7 @@ import { fileUploader } from "../../../helpars/fileUploader";
 import { paginationHelper } from "../../../helpars/paginationHelper";
 import { userSearchAbleFields } from "./user.constant";
 import { IPaginationOptions } from "../../interfaces/pagination";
+import { IAuthUser } from "../../interfaces/common";
 
 // create user
 const createUser = async (req: Request): Promise<User> => {
@@ -81,6 +82,7 @@ const getAllUsers = async (params: any, options: IPaginationOptions) => {
           },
     select: {
       id: true,
+      profilePhoto: true,
       email: true,
       name: true,
       role: true,
@@ -104,7 +106,29 @@ const getAllUsers = async (params: any, options: IPaginationOptions) => {
   };
 };
 
+// get user's own profile
+const getUserOwnProfile = async (user: IAuthUser) => {
+  const userInfo = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: user?.email,
+    },
+    select: {
+      id: true,
+      profilePhoto: true,
+      email: true,
+      name: true,
+      role: true,
+      gender: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return { ...userInfo };
+};
+
 export const userService = {
   createUser,
   getAllUsers,
+  getUserOwnProfile,
 };
