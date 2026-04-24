@@ -33,15 +33,29 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
 });
 
 // get user's own profile
-const getUserOwnProfile = catchAsync(
-  async (req: Request , res: Response) => {
-    const { id } = req.params;
-    const result = await userService.getUserOwnProfile({ id } as IAuthUser);
+const getUserOwnProfile = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await userService.getUserOwnProfile({ id } as IAuthUser);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "My profile data fetched!",
+    data: result,
+  });
+});
+
+// update user profile
+const updateUsersProfile = catchAsync(
+  async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const user = req.user;
+
+    const result = await userService.updateUsersProfile(user as IAuthUser, req);
 
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: "My profile data fetched!",
+      message: "My profile updated!",
       data: result,
     });
   },
@@ -51,4 +65,5 @@ export const userController = {
   createUser,
   getAllUsers,
   getUserOwnProfile,
+  updateUsersProfile,
 };

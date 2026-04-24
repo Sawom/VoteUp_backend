@@ -25,4 +25,14 @@ router.get("/", userController.getAllUsers);
 // get users own profile
 router.get("/:id", userController.getUserOwnProfile);
 
+// update user's profile
+router.patch(
+  "/update-my-profile",
+  fileUploader.upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    return userController.updateUsersProfile(req, res, next);
+  },
+);
+
 export const userRoutes = router;
