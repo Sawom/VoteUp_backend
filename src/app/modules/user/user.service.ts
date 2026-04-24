@@ -106,7 +106,7 @@ const getAllUsers = async (params: any, options: IPaginationOptions) => {
   };
 };
 
-// get user's own profile
+// get user's own profile ** update in later
 const getUserOwnProfile = async (user: IAuthUser) => {
   const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
@@ -127,8 +127,36 @@ const getUserOwnProfile = async (user: IAuthUser) => {
   return { ...userInfo };
 };
 
+// update my profile
+const updateUsersProfile = async (user: IAuthUser, req: Request) => {
+  // search by email
+  const userInfo = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  const file = req.file as IFile;
+  if (file) {
+    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+    req.body.profilePhoto = uploadToCloudinary?.secure_url;
+  }
+
+  let profileInfo;
+  // update logic
+  profileInfo = await prisma.user.update({
+    where: {
+      email: userInfo.email,
+    },
+    data: req.body,
+  });
+
+  return { ...profileInfo };
+};
+
 export const userService = {
   createUser,
   getAllUsers,
   getUserOwnProfile,
+  updateUsersProfile,
 };
