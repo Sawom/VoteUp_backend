@@ -110,7 +110,7 @@ const getAllUsers = async (params: any, options: IPaginationOptions) => {
 const getUserOwnProfile = async (user: IAuthUser) => {
   const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
-      email: user?.email,
+      id: user?.id,
     },
     select: {
       id: true,

@@ -5,6 +5,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../../shared/catchAsync";
 import { userFilterableFields } from "./user.constant";
 import pick from "../../../shared/pick";
+import { IAuthUser } from "../../interfaces/common";
 
 const createUser = async (req: Request, res: Response) => {
   const result = await userService.createUser(req);
@@ -31,7 +32,23 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// get user's own profile
+const getUserOwnProfile = catchAsync(
+  async (req: Request , res: Response) => {
+    const { id } = req.params;
+    const result = await userService.getUserOwnProfile({ id } as IAuthUser);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "My profile data fetched!",
+      data: result,
+    });
+  },
+);
+
 export const userController = {
   createUser,
   getAllUsers,
+  getUserOwnProfile,
 };
